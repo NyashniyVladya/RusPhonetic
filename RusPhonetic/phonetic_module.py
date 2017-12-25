@@ -158,13 +158,12 @@ class Letter(object):
         """
 
         if prev_letter is not None:
-            __self_type = type(self)
-            if not isinstance(prev_letter, __self_type):
+            if not isinstance(prev_letter, self.__class__):
                 raise Exception(
                     (
                         "Предыдущая буква должна быть объектом класса {0!r}, "
                         "или None (передан тип {1!r})."
-                    ).format(__self_type, type(prev_letter))
+                    ).format(self.__class__, prev_letter.__class__)
                 )
 
         self.__letter = letter.lower().strip()
