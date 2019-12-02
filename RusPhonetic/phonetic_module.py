@@ -76,6 +76,9 @@ class Phonetic(object):
         ):
             self.__work_word = self.__work_word.replace(old, new)
 
+    def __repr__(self):
+        return "[{0}]".format(self.get_phonetic(False))
+
     def replace_ends(self):
         for old, new in sorted(
             self.end_replace.items(),
@@ -92,7 +95,11 @@ class Phonetic(object):
                 syll_counter += 1
         return syll_counter
 
-    def get_phonetic(self):
+    def get_phonetic(self, return_letter_tuple=False):
+        """
+        :return_sound_tuple:
+            Вернуть вместо str объекта массив объектов Letter.
+        """
         _sounds = []
         _last_let = None
         syll_counter = 0
@@ -106,10 +113,9 @@ class Phonetic(object):
             _sounds.append(let)
             _last_let = let
         _sounds[-1].initialize_as_end()
-        result = ""
-        for s in _sounds:
-            result += s.get_sound()
-        return result
+        if return_letter_tuple:
+            return tuple(_sounds)
+        return "".join(map(Letter.get_sound, _sounds))
 
 
 class Letter(object):
@@ -185,6 +191,24 @@ class Letter(object):
         self.set_prev_sonorus()
         self.set_prev_hard()
         self.set_double_sound()
+
+        # Последняя ли буква в слове.
+        self._last_letter = False
+
+        # Определяем степень звучности для последующего деления на слоги.
+        if self.letter in self.marks:
+            self.__sonority_level = 0
+        elif self.letter in self.vowels:
+            self.__sonority_level = 4
+        elif self.letter in self.forever_sonorus:
+            self.__sonority_level = 3
+        elif self.letter in map(lambda _x: _x[0], self.sonorus_deaf_pairs):
+            self.__sonority_level = 2
+        else:
+            self.__sonority_level = 1
+
+    def __repr__(self):
+        return "Буква \"{0}\" [{1}]".format(self.letter, self.get_sound())
 
     def set_double_sound(self):
         prev = self.get_prev_letter()
@@ -287,6 +311,7 @@ class Letter(object):
         return _let
 
     def initialize_as_end(self):
+        self._last_letter = True
         if self.is_consonant():
             self.set_sonorus(False)
 
@@ -303,6 +328,10 @@ class Letter(object):
     @property
     def letter(self):
         return self.__letter
+
+    @property
+    def sonority_level(self):
+        return self.__sonority_level
 
     def get_prev_letter(self):
         """
