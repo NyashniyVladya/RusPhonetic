@@ -51,10 +51,11 @@ class Phonetic(object):
         "его": "ево"
     }
 
-    def __init__(self, word, acc):
+    def __init__(self, word, acc=None):
         """
         :word: Слово для разбора.
         :acc: Номер ударного слога.
+            (Если None - слово без гласных.)
         """
         self.word = self.__work_word = word.lower().strip()
 
@@ -62,11 +63,10 @@ class Phonetic(object):
             raise Exception("Слово не передано.")
 
         _sylls = self.get_sylls()
-        if not _sylls:
-            raise Exception("Передано слово без гласных.")
-        self.acc = int(acc)
-        if not (0 < self.acc <= _sylls):
-            raise Exception("Передан неверный номер слога.")
+        self.acc = (int(acc) if _sylls else None)
+        if self.acc is not None:
+            if not (0 < self.acc <= _sylls):
+                raise Exception("Передан неверный номер слога.")
 
         self.replace_ends()
         for old, new in sorted(
