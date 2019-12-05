@@ -210,6 +210,9 @@ class Letter(object):
     def __repr__(self):
         return "Буква \"{0}\" [{1}]".format(self.letter, self.get_sound())
 
+    def __hash__(self):
+        return hash((self.__letter, self.__prev_letter, self.__shock))
+
     def set_double_sound(self):
         prev = self.get_prev_letter()
         if not prev:
